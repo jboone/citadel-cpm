@@ -71,7 +71,7 @@
 
 /* MEGAHZ is the 8080-equivalent clock rate, used for busy-wait loops	*/
 /* various places -- in particular, in the WC-protocol code.		*/
-#define MEGAHZ 2		/* Z80 clock rate (for wait loops)	*/
+#define MEGAHZ 4		/* Z80 clock rate (for wait loops)	*/
 
 /* MESSAGEK sizes "ctdlmsg.sys", the file message text is stored in.	*/
 /* The size of this parameter together with the rate message text is	*/
