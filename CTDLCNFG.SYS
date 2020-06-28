@@ -67,7 +67,7 @@
 
 /* MDATA is the port Citadel will attempt to read and write modem data	*/
 /* from.  We expect 8-bit bytes, naturally...				*/
-#define MDATA D8		/* Modem data port			*/
+#define MDATA 0D		/* Modem data port			*/
 
 /* MEGAHZ is the 8080-equivalent clock rate, used for busy-wait loops	*/
 /* various places -- in particular, in the WC-protocol code.		*/
@@ -213,9 +213,11 @@
 /*	CARRDETECT returns nonzero value on valid carrier, else zero	*/
 /************************************************************************/
 #start CARRDETECT x		/* routine to sense valid carrier	*/
-#code INP DE			/* get modem line status		*/
-#code ANDI 80			/* mask off Recieved Line Signal Detect */
-#code RET x			/* return 80 (TRUE) if carrier else 0	*/
+#code LOADI 10			/*					*/
+#code OUTP 0F			/* SIO2 port B: RR0 with status reset */
+#code INP 0F			/* read modem status port */
+#code ANDI 8			/* mask off DCD (carrier) bit */
+#code RET x			/* return 08 (TRUE) if carrier else 0	*/
 
 /************************************************************************/
 /*	GETYEAR return current year					*/
@@ -242,11 +244,10 @@
 /*	HANGUP breaks the modem connection.				*/
 /************************************************************************/
 #start HANGUP x 		/* routine to break modem connection	*/
-#code LOADI 0			/* clear the... 			*/
-#code OUTP DC			/* Data Terminal Ready status bit	*/
-#code PAUSEI 50 		/* half a sec, then			*/
-#code LOADI 1			/* set it				*/
-#code OUTP Dc			/* it again.				*/
+#code LOADI 50			/*					*/
+#code OUTP 21			/* PIO port B: on-hook, no V.21 answer, no loop-back */
+#code PAUSEI 50 		/* half a sec, then	*/
+#code OUTP 0F			/* clear events */
 #code RET x			/* No interesting value returned.	*/
 
 /************************************************************************/
@@ -278,65 +279,42 @@
 /*	INITPORT sets up the modem port and modem.  No return value.	*/
 /************************************************************************/
 #start INITPORT x		/* routine to initialize modem port	*/
-#code LOADI 0			/*					*/
-#code OUTP D9			/* clear interrupt register		*/
-#code LOADI 10			/*					*/
-#code OUTP DC			/* put in loop mode			*/
-#code LOADI 80			/*					*/
-#code OUTP DB			/* Divisor Latch Access Bit = 1 	*/
-#code OUTP D8			/* 300 baud divisor, low half		*/
-#code LOADI 1			/*					*/
-#code OUTP D9			/* 300 baud divisor, high half		*/
-#code LOADI 3			/*					*/
-#code OUTP DB			/* DLAB=0, 8 bit word, 1 stop, no parity*/
-#code LOADI 0			/*					*/
-#code OUTP DA			/* clear remaining registers		*/
-#code OUTP DD			/* ...					*/
-#code OUTP DE			/* ...					*/
-#code LOADI 1			/*					*/
-#code OUTP DC			/* out of loop mode, Data Terminal Ready*/
-#code INP D8			/* Heath advises reading a char. Why?	*/
-#code PAUSEI 8			/* "wait two char times"		*/
-#code INP D8			/* "and read a second char". VooDoo?	*/
-	/************************************************/
-	/* Next line initializes the Hayes Smartmodem:	*/
-	/* AT		Attention			*/
-	/* Q1		Quiet mode -- no result codes	*/
-	/* S0=1 	Answer on first ring		*/
-	/* E0		No echo of command line 	*/
-	/* S2=255	Disable escape character	*/
-	/* S5=130	Disable backspace char		*/
-	/* T		Touch-tone dialing.		*/
-	/*						*/
-	/* My Smartmodem switches are set so:		*/
-	/* #1 up	Support DTR, to hang up 	*/
-	/* #2 down	Non verbose result codes	*/
-	/* #3 up	No result codes anyway		*/
-	/* #4 down	No echo in command state	*/
-	/* #5 up	Auto answer first ring		*/
-	/* #6 up	Generate true Carrier Detect	*/
-	/* #7 up	Single - line phone		*/
-	/* #8 down	Looks prettier that way 	*/
-	/*	(You will note that some of these are	*/
-	/*	 redundantly with next command.)	*/
-	/************************************************/
-#code OUTSTRING "AT Q1 S0=1 E0 S2=255 S5=130 T" /* stupify SmartModem	*/
-#code RET x			/* return nothing interesting		*/
+#code LOADI 18			/*					*/
+#code OUTP 0F			/* SIO2 port B: Reset channel */
+#code LOADI 14			/*					*/
+#code OUTP 0F			/* SIO2 port B: select WR4, reset ESI */
+#code LOADI 44			/*					*/
+#code OUTP 0F			/* SIO2 port B: WR4: clock, stop bits, parity */
+#code LOADI 03			/*					*/
+#code OUTP 0F			/* SIO2 port B: select WR3 */
+#code LOADI C1			/*					*/
+#code OUTP 0F			/* SIO2 port B: WR3: RX 8 bits, enabled */
+#code LOADI 05			/*					*/
+#code OUTP 0F			/* SIO2 port B: select WR5 */
+#code LOADI EA			/*					*/
+#code OUTP 0F			/* SIO2 port B: WR5: TX 8 bits, enabled, no squelch */
+#code LOADI 50			/*					*/
+#code OUTP 21			/* PIO port B: on-hook, no V.21 answer, no loop-back */
+#code RET x				/* return nothing interesting		*/
 
 /************************************************************************/
 /*	MIREADY returns nonzero value if modem char can be input, else 0*/
 /************************************************************************/
-#start MIREADY x		/* routine to sense modem char available*/
-#code INP DD			/* read modem status port		*/
-#code ANDI 1			/* mask off char-ready bit
+#start MIREADY x		/* routine to sense modem char available */
+#code LOADI 00			/*					*/
+#code OUTP 0F			/* SIO2 port B: select RR0 */
+#code INP 0F			/* read modem status port */
+#code ANDI 1			/* mask off char-ready bit */
 #code RET x			/* return 1 if char ready, else zero	*/
 
 /************************************************************************/
 /*	MOREADY returns nonzero if modem is ready for output, else 0	*/
 /************************************************************************/
 #start MOREADY x		/* routine to sense modem output OK	*/
-#code INP DD			/* read modem status port		*/
-#code ANDI 20			/* mask off output-ok bit		*/
-#code RET x			/* return 20 (TRUE) if ok, else zero	*/
+#code LOADI 00			/*					*/
+#code OUTP 0F			/* SIO2 port B: select RR0 */
+#code INP 0F			/* read modem status port */
+#code ANDI 4			/* mask off char-ready bit */
+#code RET x			/* return 4 (TRUE) if ok, else zero	*/
 
 #alldone x x			/* end of file				*/
