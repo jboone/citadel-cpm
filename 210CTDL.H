@@ -413,7 +413,7 @@ char scratch[40];	/* scratch space for config routines	*/
 char shave[8];		/* shave-and-a-haircut/2 bits pauses	*/
 
 /* routine addresses in codeBuf: */
-char *pHangUp, *pCarrDetect, *pMIReady, *pMOReady, *pInitPort;
+char *pAnswer, *pHangUp, *pRingDetect, *pCarrDetect, *pMIReady, *pMOReady, *pInitPort;
 char *pInitDate, *pGetDay, *pGetMonth, *pGetYear;
 
 /************************************************************************/

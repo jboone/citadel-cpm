@@ -200,10 +200,14 @@ main() {
 
 	    } else if (strCmp(cmd, "#start"  ) == SAMESTRING) {
 		printf("#start procedure '%s'\n", var);
-		if	  (strCmp(var, "HANGUP"    ) == SAMESTRING) {
+		if        (strCmp(var, "ANSWER"    ) == SAMESTRING) {
+		    pAnswer	= nextCode.pc;
+		} else if (strCmp(var, "HANGUP"    ) == SAMESTRING) {
 		    pHangUp	= nextCode.pc;
 		} else if (strCmp(var, "INITPORT"  ) == SAMESTRING) {
 		    pInitPort	= nextCode.pc;
+		} else if (strCmp(var, "RINGDETECT") == SAMESTRING) {
+		    pRingDetect = nextCode.pc;
 		} else if (strCmp(var, "CARRDETECT") == SAMESTRING) {
 		    pCarrDetect = nextCode.pc;
 		} else if (strCmp(var, "MIREADY"   ) == SAMESTRING) {

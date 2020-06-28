@@ -458,6 +458,10 @@ char modIn() {
     hi	= (HITIMEOUT * megaHz);
     lo	= 0xFF;
     while (TRUE) {
+    if ((haveCarrier==FALSE) && (c=interpret(pRingDetect))) {
+    	interpret(pAnswer);
+    }
+
 	if ((whichIO==MODEM) && (c=interpret(pCarrDetect)) != modStat) {
 	    /* carrier changed	 */
 	    if (c)  {	   /* carrier present	*/
@@ -476,6 +480,7 @@ char modIn() {
 		    modStat	    = FALSE;
 		    justLostCarrier = TRUE;
 
+		    interpret(pHangUp);
 /*		    while(interpret(pMIReady)) getMod();    eat garbage */
 
 		    return(0);

@@ -210,6 +210,16 @@
 /************************************************************************/
 
 /************************************************************************/
+/*	RINGDETECT returns nonzero value on ring, else zero	*/
+/************************************************************************/
+#start RINGDETECT x		/* routine to sense valid carrier	*/
+#code LOADI 10			/*					*/
+#code OUTP 0F			/* SIO2 port B: RR0 with status reset */
+#code INP 0F			/* read modem status port */
+#code ANDI 20			/* mask off CTS (ring) bit */
+#code RET x			/* return 20 (TRUE) if carrier else 0	*/
+
+/************************************************************************/
 /*	CARRDETECT returns nonzero value on valid carrier, else zero	*/
 /************************************************************************/
 #start CARRDETECT x		/* routine to sense valid carrier	*/
@@ -239,6 +249,16 @@
 #start GETDAY x 		/*					*/
 #code ARRAY[] 2 		/* load from ARRAY[2]			*/
 #code RET x			/* return it				*/
+
+/************************************************************************/
+/*	ANSWER answers a ring.				*/
+/************************************************************************/
+#start ANSWER x 		/* routine to answer a ring */
+#code LOADI 10			/*					*/
+#code OUTP 21			/* PIO port B: off-hook, no V.21 answer, no loop-back */
+#code PAUSEI 50 		/* half a sec, then	*/
+#code OUTP 0F			/* clear events */
+#code RET x			/* No interesting value returned.	*/
 
 /************************************************************************/
 /*	HANGUP breaks the modem connection.				*/
