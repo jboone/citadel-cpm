@@ -282,7 +282,7 @@
 /************************************************************************/
 #start INITDATE x		/*					*/
 
-#code OPR# "Year" 82 90 	/* get year from console		*/
+#code OPR# "Year" 20 37 	/* get year from console		*/
 #code ARRAY[]= 0		/* remember it in ARRAY[0]		*/
 
 #code OPR# "Month" 1 12 	/* get month from console		*/
